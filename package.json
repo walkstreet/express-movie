@@ -10,7 +10,7 @@
     "express",
     "mongodb"
   ],
-  "author": "King",
+  "author": "King <qingskybabe@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.17.1",
