@@ -6,15 +6,19 @@ var bodyParser = require('body-parser');
 var path = require('path');
 // Mongoose是在node.js异步环境下对mongodb进行便捷操作的对象模型工具
 var mongoose = require('mongoose');
+// 引入md5加密
+var md5 = require('md5');
 // 引入underscore库
 var _ = require('underscore');
 // 引入mongoose定义整合后的模型文件
 var Movie = require('./models/movie');
+var Admin = require('./models/admin');
 // 环境变量，默认为3000，可通过PORT=4000 node app.js运行
 var port = process.env.PORT || 3000;
 // 赋值express函数
 var app = express();
 
+mongoose.Promise = global.Promise;
 // 连接到mongo里的imooc数据库
 mongoose.connect('mongodb://localhost/imooc');
 
@@ -177,4 +181,50 @@ app.delete('/admin/list', function(req, res) {
             }
         })
     }
+})
+
+// 登录页
+app.get('/login', function(req, res) {
+    // 渲染admin.jade页面，并将表单数据默认置为空
+    res.render('login', {
+        title: 'imooc 登录页',
+        admin: {
+            username: '',
+            password: ''
+        }
+    })
+})
+
+// 登录操作
+app.post('/admin/login', function(req, res) {
+    var originPwd = req.body.admin.password;
+    Admin.findByUser(req.body.admin.username, function(err, admin) {
+        if(err) {
+            console.log(err);
+        }
+        else{
+            // 判断密码是否一致
+            if(md5(originPwd) == admin.password) {
+                console.log('login success');
+                res.redirect('/');
+            }
+        }
+    })
+})
+
+app.get('/admin/addAdmin', function(req, res) {
+     admin = new Admin({
+        user: "king",
+        password: "870111"
+    })
+    // 保存到数据库中，重定向到id所在详情页
+    admin.save(function(err, movie) {
+        if(err){
+            console.log(err)
+        }
+        else{
+            console.log("添加king管理员");
+            res.redirect('/login');
+        }
+    })
 })
